@@ -16,11 +16,11 @@ from alsaaudio import Mixer, mixers as alsa_mixers
 from os.path import dirname, join
 
 from adapt.intent import IntentBuilder
-from mycroft.audio import wait_while_speaking
-from mycroft.messagebus.message import Message
-from mycroft.skills.core import MycroftSkill, intent_handler
-from mycroft.util import play_wav
-from mycroft.util.parse import extract_number
+from core.audio import wait_while_speaking
+from core.messagebus.message import Message
+from core.skills.core import MycroftSkill, intent_handler
+from core.util import play_wav
+from core.util.parse import extract_number
 
 
 ALSA_PLATFORMS = ['mycroft_mark_1', 'picroft', 'unknown']
