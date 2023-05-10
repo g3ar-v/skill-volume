@@ -18,7 +18,7 @@ from os.path import dirname, join
 from adapt.intent import IntentBuilder
 from core.audio import wait_while_speaking
 from core.messagebus.message import Message
-from core.skills.core import MycroftSkill, intent_handler
+from core.skills import Skill, intent_handler
 from core.util import play_wav
 from core.util.parse import extract_number
 
@@ -26,7 +26,7 @@ from core.util.parse import extract_number
 ALSA_PLATFORMS = ['mycroft_mark_1', 'picroft', 'unknown']
 
 
-class VolumeSkill(MycroftSkill):
+class VolumeSkill(Skill):
     """
     Control the audio volume for the Mycroft system
 
@@ -115,13 +115,13 @@ class VolumeSkill(MycroftSkill):
             self.register_vocabulary(str(i) + '%', 'Percent')
 
         # Register handlers for messagebus events
-        self.add_event('mycroft.volume.increase',
+        self.add_event('core.volume.increase',
                        self.handle_increase_volume)
-        self.add_event('mycroft.volume.decrease',
+        self.add_event('core.volume.decrease',
                        self.handle_decrease_volume)
-        self.add_event('mycroft.volume.mute',
+        self.add_event('core.volume.mute',
                        self.handle_mute_volume)
-        self.add_event('mycroft.volume.unmute',
+        self.add_event('core.volume.unmute',
                        self.handle_unmute_volume)
         self.add_event('recognizer_loop:record_begin',
                        self.duck)
@@ -148,7 +148,7 @@ class VolumeSkill(MycroftSkill):
 
         if emit:
             # Notify non-ALSA systems of volume change
-            self.bus.emit(Message('mycroft.volume.set',
+            self.bus.emit(Message('core.volume.set',
                                   data={"percent": vol/100.0}))
 
     # Change Volume to X (Number 0 to) Intent Handlers
@@ -246,7 +246,7 @@ class VolumeSkill(MycroftSkill):
         if speak_message:
             self.speak_dialog('max.volume')
             wait_while_speaking()
-        self.bus.emit(Message('mycroft.volume.duck'))
+        self.bus.emit(Message('core.volume.duck'))
 
     @intent_handler(IntentBuilder("MaxVolumeIncreaseMax")
                     .require("MaxVolumePhrase").optionally("Volume")
@@ -272,7 +272,7 @@ class VolumeSkill(MycroftSkill):
             self.speak_dialog('mute.volume')
             wait_while_speaking()
         self._setvolume(0, emit=False)
-        self.bus.emit(Message('mycroft.volume.duck'))
+        self.bus.emit(Message('core.volume.duck'))
 
     # Mute Volume Intent Handlers
     @intent_handler(IntentBuilder("MuteVolume").require(
@@ -289,7 +289,7 @@ class VolumeSkill(MycroftSkill):
         self.vol_before_mute = None
 
         self._setvolume(vol, emit=False)
-        self.bus.emit(Message('mycroft.volume.unduck'))
+        self.bus.emit(Message('core.volume.unduck'))
 
         if speak:
             self.speak_dialog('reset.volume',
@@ -375,7 +375,7 @@ class VolumeSkill(MycroftSkill):
             self.log.debug('Volume before mute: {}'.format(vol))
         else:
             vol_msg = self.bus.wait_for_response(
-                                Message("mycroft.volume.get", {'show': show}))
+                                Message("core.volume.get", {'show': show}))
             if vol_msg:
                 vol = int(vol_msg.data["percent"] * 100)
 
